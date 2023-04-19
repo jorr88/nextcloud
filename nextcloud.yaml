@@ -1,0 +1,47 @@
+---
+version: "2"
+
+volumes:
+  nextcloud:
+  db:
+
+services:
+  db:
+    #image: yobasystems/alpine-mariadb:latest
+    image: linuxserver/mariadb
+    container_name: db_nextcloud  
+      #command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: unless-stopped
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_INITDB_SKIP_TZINFO=1
+      - MYSQL_ROOT_PASSWORD=jmznextcloud88 #Cambiar esto
+      - MYSQL_PASSWORD=jmzbbdd88 #Cambiar esto
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+    networks:
+      jmz_net:
+
+  app:
+    image: nextcloud
+    container_name: nextcloud  
+    ports:
+      - 8080:80
+    links:
+      - db
+    volumes:
+      - /home/pi/apps/config/nextcloud:/var/www/html #Cambie 'nextcloud' a su volumen de unidad externa si está disponible
+    environment:
+      - MYSQL_ROOT_PASSWORD=jmznextcloud88
+      - MYSQL_PASSWORD=jmzbbdd88
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+    restart: always
+    networks:
+      jmz_net:
+
+networks:
+  jmz_net:
+    name: jmz_networks
+    driver: bridge
